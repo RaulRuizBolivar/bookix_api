@@ -17,6 +17,7 @@ router.get( '/', async ( req, res ) => {
 		res.json( { error: err.message } )
 	}
 } )
+
 router.get( '/historial/:bookClub_id', async ( req, res ) => {
 	try {
 		let historial = await BookClub.getHistorial( req.params.bookClub_id )
@@ -73,6 +74,7 @@ router.get( '/genre/:genre_id', async ( req, res ) => {
 } )
 
 router.post( '/', async ( req, res ) => {
+	/* A try catch block. */
 	try {
 		let created = await BookClub.create( req.body )
 		console.log( created )
