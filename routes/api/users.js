@@ -1,6 +1,7 @@
 const router = require( 'express' ).Router()
 const User = require( '../../models/user.model' )
 const BookClub = require( '../../models/book_club.model' )
+const Historial = require( '../../models/historial.model' )
 
 router.get( '/historial/:user_id', async ( req, res ) => {
 	try {
@@ -43,11 +44,14 @@ router.post( '/', async ( req, res ) => {
 	}
 } )
 
-router.post( '/comment', async ( req, res ) => {
+router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', async ( req, res ) => {
 	try {
-
+		const { user_id, book_id, book_club_id, action } = req.params
+		const { comment } = req.body
+		await Historial.action( { user_id, book_id, book_club_id, action, comment } )
+		res.json( await Historial.getAction( { user_id, book_id, book_club_id, action } ) )
 	} catch ( err ) {
-		res.json( { erros: err.message } )
+		res.json( { erro1: err.message } )
 	}
 } )
 
