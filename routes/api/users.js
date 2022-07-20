@@ -2,6 +2,9 @@ const router = require( 'express' ).Router()
 const User = require( '../../models/user.model' )
 const BookClub = require( '../../models/book_club.model' )
 const Historial = require( '../../models/historial.model' )
+const bcrypt = require( "bcryptjs" );
+const { body, validationResult } = require( "express-validator" );
+const { createToken } = require( "../../helpers/utils" );
 
 router.get( '/historial/:user_id', async ( req, res ) => {
 	try {
@@ -36,6 +39,7 @@ router.get( '/:user_id', async ( req, res ) => {
 
 router.post( '/', async ( req, res ) => {
 	try {
+		req.body.password = bcrypt.hashSync( req.body.password, 12 );
 		let created = await User.create( req.body )
 		console.log( created )
 		res.json( await User.getOne( created.insertId ) )
