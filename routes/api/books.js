@@ -85,8 +85,7 @@ router.post( '/', async ( req, res ) => {
 
 router.put( '/:book_id', async ( req, res ) => {
 	try {
-		let updated = await Book.update( req.params.book_id, req.body )
-		console.log( updated )
+		await Book.update( req.params.book_id, req.body )
 		res.json( await Book.getOne( req.params.book_id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )

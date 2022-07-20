@@ -4,7 +4,6 @@ const Book = require( '../../models/book.model' )
 const Genre = require( '../../models/genre.model' )
 const Subscription = require( '../../models/subscription.model' )
 const User = require( '../../models/user.model' )
-const { getHistorial } = require( '../../models/user.model' )
 
 router.get( '/', async ( req, res ) => {
 	try {
@@ -73,6 +72,41 @@ router.get( '/genre/:genre_id', async ( req, res ) => {
 	}
 } )
 
+router.post( '/', async ( req, res ) => {
+	try {
+		let created = await BookClub.create( req.body )
+		console.log( created )
+		res.json( await BookClub.getOne( created.insertId ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
+router.put( '/:book_club_id', async ( req, res ) => {
+	try {
+		const id = req.params.book_club_id
+		await BookClub.update( id, req.body )
+		res.json( await BookClub.getOne( id ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
+
+router.delete( '/:book_club_id', async ( req, res ) => {
+	try {
+		let borrado = await BookClub.getOne( req.params.book_club_id )
+		await BookClub.deleteById( req.params.book_club_id )
+		res.json( borrado )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
 
 
 module.exports = router
+
+
+
+
