@@ -26,7 +26,7 @@ const createToken = ( user ) => {
     userId: user.id,
     expDate: dayjs().add( 1, "days" ).unix(),
   };
-  return jwt.sign( obj, "gimnasio" );
+  return jwt.sign( obj, "bookix" );
 };
 
 module.exports = { executeQuery, executeQueryOne, createToken };

@@ -1,7 +1,10 @@
 const { executeQuery, executeQueryOne } = require( "../helpers/utils" );
 
 const getOne = user_id => {
-	return executeQueryOne( 'select id,username,email,image,name from users where id = ?;', [ user_id ] )
+	return executeQueryOne( 'select * from users where id = ?;', [ user_id ] )
+}
+const getOneByEmail = email => {
+	return executeQueryOne( 'select * from users where email = ?;', [ email ] )
 }
 const getHistorial = user_id => {
 	return executeQuery( 'select * from historial where user_id = ?;', [ user_id ] )
@@ -23,5 +26,5 @@ const deleteById = user_id => {
 }
 
 module.exports = {
-	getOne, getHistorial, getSubscriptions, create, update, deleteById
+	getOne, getHistorial, getSubscriptions, create, update, deleteById, getOneByEmail
 };
