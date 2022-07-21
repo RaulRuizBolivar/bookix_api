@@ -3,6 +3,7 @@ const BookClub = require( '../../models/book_club.model' )
 const Book = require( '../../models/book.model' )
 const Genre = require( '../../models/genre.model' )
 const Subscription = require( '../../models/subscription.model' )
+const Historial = require( '../../models/historial.model' )
 const User = require( '../../models/user.model' )
 
 router.get( '/', async ( req, res ) => {
@@ -68,6 +69,27 @@ router.get( '/genre', async ( req, res ) => {
 router.get( '/genre/:genre_id', async ( req, res ) => {
 	try {
 		res.json( await BookClub.getAllByGenre( req.params.genre_id ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
+router.get( '/votes/:book_club_id', async ( req, res ) => {
+	const { book_club_id } = req.params
+	try {
+		let response = []
+		const booksVoted = await Historial.getArrBooksVoted( book_club_id )
+		for ( let book of booksVoted ) {
+			const vote = await Historial.getSumVoteWeight( book_club_id )
+			const users = await Historial.getUsersVote( book_club_id, book.id )
+			console.log( users )
+			response.push( {
+				book: book,
+				usersVoted: users,
+				vote_weight: Number( vote.vote_weight )
+			} )
+		}
+		res.json( response )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
