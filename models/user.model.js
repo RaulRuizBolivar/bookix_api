@@ -6,6 +6,9 @@ const getOne = user_id => {
 const getOneByEmail = email => {
 	return executeQueryOne( 'select * from users where email = ?;', [ email ] )
 }
+const getOneByUsername = username => {
+	return executeQueryOne( 'select * from users where username = ?', [ username ] )
+}
 const getHistorial = user_id => {
 	return executeQuery( 'select * from historial where user_id = ?;', [ user_id ] )
 }
@@ -26,5 +29,12 @@ const deleteById = user_id => {
 }
 
 module.exports = {
-	getOne, getHistorial, getSubscriptions, create, update, deleteById, getOneByEmail
+	getOne,
+	getHistorial,
+	getSubscriptions,
+	create,
+	update,
+	deleteById,
+	getOneByEmail,
+	getOneByUsername
 };

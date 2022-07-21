@@ -55,8 +55,10 @@ router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', asy
 } )
 
 router.post( '/register', async ( req, res ) => {
+	if ( await User.getOneByUsername( req.body.username ) || await User.getOneByEmail( req.body.email ) ) return res.json( { error: "Nombre de usuario o email en uso, por favor, elija otro" } )
 	try {
 		req.body.password = bcrypt.hashSync( req.body.password, 12 );
+		if ( !req.body.image ) req.body.image = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
 		let created = await User.create( req.body )
 		console.log( created )
 		res.json( await User.getOne( created.insertId ) )
