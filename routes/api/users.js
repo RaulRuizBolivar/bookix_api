@@ -2,6 +2,7 @@ const router = require( 'express' ).Router()
 const User = require( '../../models/user.model' )
 const BookClub = require( '../../models/book_club.model' )
 const Historial = require( '../../models/historial.model' )
+const Subscription = require( '../../models/subscription.model' )
 const bcrypt = require( "bcryptjs" );
 const { body, validationResult } = require( "express-validator" );
 const { createToken } = require( "../../helpers/utils" );
@@ -80,17 +81,6 @@ router.put( '/:user_id', async ( req, res ) => {
 		let updated = await User.update( req.params.user_id, req.body )
 		console.log( updated )
 		res.json( await User.getOne( req.params.user_id ) )
-	} catch ( err ) {
-		res.json( { error: err.message } )
-	}
-} )
-
-router.delete( '/:user_id', async ( req, res ) => {
-	try {
-		const { user_id } = req.params
-		let deleted = await User.getOne( user_id )
-		await User.deleteById( user_id )
-		res.json( deleted )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
