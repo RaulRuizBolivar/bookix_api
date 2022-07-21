@@ -85,6 +85,7 @@ router.post( '/login', async ( req, res ) => {
 
 router.put( '/:user_id', async ( req, res ) => {
 	try {
+		req.body.password = bcrypt.hashSync( req.body.password, 12 );
 		let updated = await User.update( req.params.user_id, req.body )
 		console.log( updated )
 		res.json( await User.getOne( req.params.user_id ) )
