@@ -42,10 +42,15 @@ router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', asy
 	try {
 		const { user_id, book_id, book_club_id, action } = req.params
 		const { comment } = req.body
+		const { phase } = await BookClub.getPhase( book_club_id )
+		const bookFromBookClub = await BookClub.getOne( book_club_id )
+		console.log( phase )
+		if ( phase !== action ) return res.json( { error: 'No puedes hacer ahora esa acción, espera a que el club de lectura se encuentre en la fase que permita ' + action } )
+		if ( bookFromBookClub.book_id !== Number( book_id ) ) return res.json( { error: 'No puedes hacer una acción sobre un libro que no es el activo del club de lectura' } )
 		await Historial.action( { user_id, book_id, book_club_id, action, comment } )
 		res.json( await Historial.getAction( { user_id, book_id, book_club_id, action } ) )
 	} catch ( err ) {
-		res.json( { erro1: err.message } )
+		res.json( { error: err.message } )
 	}
 } )
 

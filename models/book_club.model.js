@@ -24,6 +24,10 @@ const getAllBooksRead = bookClub_id => {
 	return executeQuery( "select b.id, b.title, b.author, b.num_pages, g.genre, b.synopsis, b.front_page from books b inner join historial h on h.book_id = b.id inner join genres g on b.genre_id = g.id where h.book_club_id = ? and h.action = 'read';", [ bookClub_id ] )
 }
 
+const getPhase = bookClub_id => {
+	return executeQueryOne( "select phase from book_club where id = ?", [ bookClub_id ] )
+}
+
 const create = ( { num_pages, name, image, phase, genre_id, user_id } ) => {
 	if ( !image ) image = 'https://www.pamplona.es/sites/default/files/inline-images/libros_biblioteca-web_2.jpg'
 	return executeQuery( 'insert into book_club (num_pages, name, image, phase, genre_id, user_id) values (?,?,?,?,?,?)', [ num_pages, name, image, phase, genre_id, user_id ] )
@@ -48,5 +52,6 @@ module.exports = {
 	getOne,
 	create,
 	update,
-	deleteById
+	deleteById,
+	getPhase
 };
