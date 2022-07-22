@@ -1,4 +1,7 @@
 const { executeQuery, executeQueryOne } = require( "../helpers/utils" );
+const Book = require( './book.model' )
+const Historial = require( './historial.model' )
+
 
 const getAll = () => {
 	return executeQuery( 'select * from book_club;' )
@@ -28,6 +31,19 @@ const getPhase = bookClub_id => {
 	return executeQueryOne( "select phase from book_club where id = ?", [ bookClub_id ] )
 }
 
+const setPhase = ( phase, book_club_id ) => {
+	return executeQueryOne( 'update book_club set phase = ? where id = ?', [ phase, book_club_id ] )
+}
+
+const setMissingPages = ( missingPages, book_club_id ) => {
+	return executeQueryOne( 'update book_club set missing_pages = ? where id = ?', [ missingPages, book_club_id ] )
+}
+
+const setNewBook = ( newBook_id, book_club_id ) => {
+	return executeQueryOne( 'update book_club set book_id = ? where id = ?', [ newBook_id, book_club_id ] )
+}
+
+
 const create = ( { num_pages, name, image, phase, genre_id, user_id } ) => {
 	if ( !image ) image = 'https://www.pamplona.es/sites/default/files/inline-images/libros_biblioteca-web_2.jpg'
 	return executeQuery( 'insert into book_club (num_pages, name, image, phase, genre_id, user_id) values (?,?,?,?,?,?)', [ num_pages, name, image, phase, genre_id, user_id ] )
@@ -42,6 +58,57 @@ const deleteById = book_id => {
 	return executeQuery( 'delete from book_club where id = ?', [ book_id ] )
 }
 
+const startRead = async () => {
+	const allBookClub = await getAll()
+	for ( const bookClub of allBookClub ) {
+		await setPhase( 'read', bookClub.id )
+		if ( bookClub.missing_pages < 0 ) {
+			const books = await Historial.getWinner( bookClub.id )
+			let winner = {
+				book: books[ 0 ],
+				weight: 0
+			}
+			for ( let vote of books ) {
+				if ( vote.vote_weight > winner.weight ) {
+					winner.book = vote.book
+					winner.weight = vote.vote_weight
+				}
+			}
+			setNewBook( winner.book.id, bookClub.id )
+			setMissingPages( winner.book.num_pages, bookClub.id )
+		}
+		const newMissingPages = bookClub.missing_pages - bookClub.num_pages
+		await setMissingPages( newMissingPages, bookClub.id )
+	}
+	console.log( 'Todos los clubs de lectura ahora están leyendo' )
+}
+
+const readoOrComment = async () => {
+	const allBookClub = await getAll()
+	for ( const bookClub of allBookClub ) {
+		console.log( bookClub.missing_pages )
+		if ( bookClub.missing_pages < 0 ) {
+			console.log( bookClub.name + ': Ahora está comentando' )
+			return await setPhase( 'comment', bookClub.id )
+		}
+		await setPhase( 'read', bookClub.id )
+	}
+}
+
+const commentOrVote = async () => {
+	const allBookClub = await getAll()
+	console.log( 'commentOrVote' )
+	for ( const bookClub of allBookClub ) {
+		console.log( bookClub.missing_pages )
+		if ( bookClub.missing_pages < 0 ) {
+			console.log( bookClub.name + ': Ahora está votando' )
+			return await setPhase( 'vote', bookClub.id )
+		}
+		console.log( bookClub.name + ': Ahora está comentando' )
+		await setPhase( 'comment', bookClub.id )
+	}
+}
+
 module.exports = {
 	getAllByAdmin,
 	getAllByGenre,
@@ -53,5 +120,11 @@ module.exports = {
 	create,
 	update,
 	deleteById,
-	getPhase
+	getPhase,
+	setPhase,
+	setMissingPages,
+	startRead,
+	readoOrComment,
+	commentOrVote,
+	setNewBook
 };

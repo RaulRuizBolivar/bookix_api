@@ -77,19 +77,7 @@ router.get( '/genre/:genre_id', async ( req, res ) => {
 router.get( '/votes/:book_club_id', async ( req, res ) => {
 	const { book_club_id } = req.params
 	try {
-		let response = []
-		const booksVoted = await Historial.getArrBooksVoted( book_club_id )
-		for ( let book of booksVoted ) {
-			const vote = await Historial.getSumVoteWeight( book_club_id )
-			const users = await Historial.getUsersVote( book_club_id, book.id )
-			console.log( users )
-			response.push( {
-				book: book,
-				usersVoted: users,
-				vote_weight: Number( vote.vote_weight )
-			} )
-		}
-		res.json( response )
+		res.json( await Historial.getVotes( book_club_id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
