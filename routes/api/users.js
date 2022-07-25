@@ -6,26 +6,47 @@ const Subscription = require( '../../models/subscription.model' )
 const bcrypt = require( "bcryptjs" );
 const { body, validationResult } = require( "express-validator" );
 const { createToken } = require( "../../helpers/utils" );
+const { checkToken } = require( '../../helpers/middlewares' )
 
-router.get( '/historial/:user_id', async ( req, res ) => {
+router.get( '/historial/', checkToken, async ( req, res ) => {
+	try {
+		res.json( await User.getHistorial( req.user.id ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+router.get( '/historial/:user_id', checkToken, async ( req, res ) => {
 	try {
 		res.json( await User.getHistorial( req.params.user_id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
 } )
-router.get( '/suscripciones/:user_id', async ( req, res ) => {
+router.get( '/suscripciones/', checkToken, async ( req, res ) => {
 	try {
-		res.json( await User.getSubscriptions( req.params.user_id ) )
+		res.json( await User.getSubscriptions( req.user.id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
 } )
-router.get( '/:user_id/book_club', async ( req, res ) => {
-	let user = await User.getOne( req.params.user_id )
-	user.book_club = await BookClub.getAllByAdmin( req.params.user_id )
+router.get( '/book_club', checkToken, async ( req, res ) => {
 	try {
-		res.json( user )
+		res.json( await BookClub.getAllByAdmin( req.user.id ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+router.get( '/book_club/:user_id', async ( req, res ) => {
+	try {
+		res.json( await BookClub.getAllByAdmin( req.params.user_id ) )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
+router.get( '/', checkToken, async ( req, res ) => {
+	try {
+		res.json( await User.getOne( req.user.id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
