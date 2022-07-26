@@ -7,14 +7,14 @@ const getAll = () => {
 	return executeQuery( 'select * from book_club;' )
 }
 const getOne = bookClub_id => {
-	return executeQueryOne( 'select * from book_club bc where id = ?', [ bookClub_id ] )
+	return executeQueryOne( 'select  bc.*, (select genre from genres where id = genre_id) as genre , (select username from users where id = user_id) as user , (select title from books where id = book_id) as book from book_club bc where id = ?;', [ bookClub_id ] )
 }
 const getAllByAdmin = user_id => {
 	return executeQuery( 'select bc.id,bc.num_pages,bc.creation_date,bc.name,bc.image,bc.phase, g.genre,bc.user_id from book_club bc  inner join genres g on bc.genre_id = g.id where user_id = ?', [ user_id ] )
 
 }
 const getHistorial = bookClub_id => {
-	return executeQuery( 'select  h.book_id book,  h.book_club_id book_club,  h.user_id user,  h.action,  h.comment ,h.date from historial h where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
+	return executeQuery( 'select  (select username from users where id = h.user_id) as username, (select name from users where id = h.user_id) as name, (select image from users where id = h.user_id) as image, (select front_page from books where id = h.book_id) as front_page, (select title from books where id = h.book_id) as title,(select author from books where id = h.book_id) as author,(select num_pages from books where id = h.book_id) as num_pages,(select synopsis from books where id = h.book_id) as synopsis, action, date, comment from historial h  where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
 }
 const getAllByGenre = genre_id => {
 	return executeQuery( 'select bc.* from book_club as bc where genre_id = ?;', [ genre_id ] )
