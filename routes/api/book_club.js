@@ -19,6 +19,15 @@ router.get( '/', async ( req, res ) => {
 	}
 } )
 
+router.get( '/:id', async ( req, res ) => {
+	try {
+		let bookClub = await BookClub.getOne( req.params.id )
+		res.json( bookClub )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
 router.get( '/historial/:bookClub_id', async ( req, res ) => {
 	try {
 		let historial = await BookClub.getHistorial( req.params.bookClub_id )
