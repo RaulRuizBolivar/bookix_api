@@ -22,7 +22,7 @@ router.get( '/historial/:user_id', checkToken, async ( req, res ) => {
 		res.json( { error: err.message } )
 	}
 } )
-router.get( '/suscripciones/', checkToken, async ( req, res ) => {
+router.get( '/subscriptions', checkToken, async ( req, res ) => {
 	try {
 		res.json( await User.getSubscriptions( req.user.id ) )
 	} catch ( err ) {
