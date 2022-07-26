@@ -16,6 +16,11 @@ const getSubscriptions = user_id => {
 	return executeQuery( 'select (select name from book_club where id = subscriptions.book_club_id) as name,(select image from book_club where id = subscriptions.book_club_id) as image, subscriptions.* from subscriptions where user_id = ?;', [ user_id ] )
 }
 
+const subscribe = ( user_id, book_club_id ) => {
+	console.log( 'subscribe' )
+	return executeQuery( 'insert into subscriptions (user_id,book_club_id) values(?,?)', [ user_id, book_club_id ] )
+}
+
 const create = ( { username, email, password, image, name } ) => {
 	return executeQuery( "insert into users (username,email,password,image,name) values (?,?,?,?,?)", [ username, email, password, image, name ] )
 }
@@ -28,6 +33,10 @@ const deleteById = user_id => {
 	return executeQuery( 'delete from users where id = ?', [ user_id ] )
 }
 
+const unsubscribe = ( user_id, book_club_id ) => {
+	return executeQuery( 'delete from subscriptions where user_id = ? and book_club_id = ? ', [ user_id, book_club_id ] )
+}
+
 module.exports = {
 	getOne,
 	getHistorial,
@@ -36,5 +45,7 @@ module.exports = {
 	update,
 	deleteById,
 	getOneByEmail,
-	getOneByUsername
+	getOneByUsername,
+	subscribe,
+	unsubscribe
 };

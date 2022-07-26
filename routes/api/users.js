@@ -59,6 +59,18 @@ router.get( '/:user_id', async ( req, res ) => {
 	}
 } )
 
+router.post( '/subscribe/:book_club_id', checkToken, async ( req, res ) => {
+	console.log( req.user.id, req.params.book_club_id )
+	try {
+		await User.subscribe( req.user.id, req.params.book_club_id )
+		res.json( {
+			success: 'Suscripción terminada con exito!'
+		} )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
 router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', async ( req, res ) => {
 	try {
 		const { user_id, book_id, book_club_id, action } = req.params
@@ -74,6 +86,8 @@ router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', asy
 		res.json( { error: err.message } )
 	}
 } )
+
+
 
 router.post( '/register', async ( req, res ) => {
 	if ( await User.getOneByUsername( req.body.username ) || await User.getOneByEmail( req.body.email ) ) return res.json( { error: "Nombre de usuario o email en uso, por favor, elija otro" } )
@@ -115,4 +129,16 @@ router.put( '/:user_id', async ( req, res ) => {
 	}
 } )
 
+
+router.delete( '/subscribe/:book_club_id', checkToken, async ( req, res ) => {
+	console.log( req.user.id, req.params.book_club_id )
+	try {
+		await User.unsubscribe( req.user.id, req.params.book_club_id )
+		res.json( {
+			success: 'Suscripción terminada con exito!'
+		} )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
 module.exports = router
