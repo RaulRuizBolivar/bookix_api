@@ -10,10 +10,10 @@ const getOneByUsername = username => {
 	return executeQueryOne( 'select * from users where username = ?', [ username ] )
 }
 const getHistorial = user_id => {
-	return executeQuery( 'select * from historial where user_id = ?;', [ user_id ] )
+	return executeQuery( 'select (select username from users where id = ?) as username, (select name from users where id = ?) as name, (select image from users where id = ?) as image, action, date, comment, (select title from books where id = historial.book_id) as tittle, (select front_page from books where id = historial.book_id) as front_page from historial where user_id = ? order by date desc;', [ user_id, user_id, user_id, user_id ] )
 }
 const getSubscriptions = user_id => {
-	return executeQuery( 'select * from subscriptions where user_id = ?;', [ user_id ] )
+	return executeQuery( 'select (select name from book_club where id = subscriptions.book_club_id) as name,(select image from book_club where id = subscriptions.book_club_id) as image, subscriptions.* from subscriptions where user_id = ?;', [ user_id ] )
 }
 
 const create = ( { username, email, password, image, name } ) => {

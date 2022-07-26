@@ -7,7 +7,7 @@ const getAll = () => {
 	return executeQuery( 'select * from book_club;' )
 }
 const getOne = bookClub_id => {
-	return executeQueryOne( 'select * from book_club where id = ?', [ bookClub_id ] )
+	return executeQueryOne( 'select * from book_club bc where id = ?', [ bookClub_id ] )
 }
 const getAllByAdmin = user_id => {
 	return executeQuery( 'select bc.id,bc.num_pages,bc.creation_date,bc.name,bc.image,bc.phase, g.genre,bc.user_id from book_club bc  inner join genres g on bc.genre_id = g.id where user_id = ?', [ user_id ] )
