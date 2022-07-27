@@ -14,7 +14,7 @@ const getAllByAdmin = user_id => {
 
 }
 const getHistorial = bookClub_id => {
-	return executeQuery( 'select  (select username from users where id = h.user_id) as username, (select name from users where id = h.user_id) as name, (select image from users where id = h.user_id) as image, (select front_page from books where id = h.book_id) as front_page, (select title from books where id = h.book_id) as title,(select author from books where id = h.book_id) as author,(select num_pages from books where id = h.book_id) as num_pages,(select synopsis from books where id = h.book_id) as synopsis, action, date, comment from historial h  where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
+	return executeQuery( 'select  (select username from users where id = h.user_id) as username, (select name from users where id = h.user_id) as name, (select image from users where id = h.user_id) as image, (select front_page from books where id = h.book_id) as front_page, (select title from books where id = h.book_id) as title,(select author from books where id = h.book_id) as author,(select num_pages from books where id = h.book_id) as num_pages,(select synopsis from books where id = h.book_id) as synopsis, action, date, comment,book_id from historial h  where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
 }
 const getAllByGenre = genre_id => {
 	return executeQuery( 'select bc.* from book_club as bc where genre_id = ?;', [ genre_id ] )

@@ -90,6 +90,7 @@ router.post( '/:action/user/:user_id/book/:book_id/book_club/:book_club_id', asy
 
 
 router.post( '/register', async ( req, res ) => {
+	console.log( req.body )
 	if ( await User.getOneByUsername( req.body.username ) || await User.getOneByEmail( req.body.email ) ) return res.json( { error: "Nombre de usuario o email en uso, por favor, elija otro" } )
 	try {
 		req.body.password = bcrypt.hashSync( req.body.password, 12 );
