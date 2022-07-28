@@ -6,7 +6,7 @@ const getAll = () => {
 }
 
 const getOne = book_id => {
-	return executeQueryOne( 'select * from books where id = ?', [ book_id ] )
+	return executeQueryOne( 'select books.* ,(select genre from genres where id = genre_id) as genre from books where id = ?', [ book_id ] )
 }
 
 const getAllByGenre = genre_id => {

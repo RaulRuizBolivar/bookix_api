@@ -19,14 +19,7 @@ router.get( '/', async ( req, res ) => {
 	}
 } )
 
-router.get( '/:id', async ( req, res ) => {
-	try {
-		let bookClub = await BookClub.getOne( req.params.id )
-		res.json( bookClub )
-	} catch ( err ) {
-		res.json( { error: err.message } )
-	}
-} )
+
 
 router.get( '/historial/:bookClub_id', async ( req, res ) => {
 	try {
@@ -92,10 +85,18 @@ router.get( '/votes/:book_club_id', async ( req, res ) => {
 	}
 } )
 
-router.post( '/', async ( req, res ) => {
-	/* A try catch block. */
+router.get( '/:id', async ( req, res ) => {
 	try {
-		let created = await BookClub.create( req.body )
+		let bookClub = await BookClub.getOne( req.params.id )
+		res.json( bookClub )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
+
+router.post( '/', async ( req, res ) => {
+	try {
+		let created = await BookClub.create( req.user.id, req.body )
 		console.log( created )
 		res.json( await BookClub.getOne( created.insertId ) )
 	} catch ( err ) {

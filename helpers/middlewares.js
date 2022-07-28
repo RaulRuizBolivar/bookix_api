@@ -4,7 +4,10 @@ const User = require( "../models/user.model" );
 
 const checkToken = async ( req, res, next ) => {
 	if ( !req.headers[ "authorization" ] ) {
-		return res.json( { error: "No tienes token en la cabecera" } );
+		return res.json( {
+			error: "No tienes token en la cabecera",
+			message: req.headers
+		} );
 	}
 	const token = req.headers[ "authorization" ];
 	let obj;
