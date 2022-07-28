@@ -1,5 +1,7 @@
 const { executeQuery, executeQueryOne } = require( "../helpers/utils" );
 
+const Historial = require( './historial.model' )
+
 const getOne = user_id => {
 	return executeQueryOne( 'select * from users where id = ?;', [ user_id ] )
 }
@@ -37,6 +39,15 @@ const unsubscribe = ( user_id, book_club_id ) => {
 	return executeQuery( 'delete from subscriptions where user_id = ? and book_club_id = ? ', [ user_id, book_club_id ] )
 }
 
+const readAll = async ( book_club_id, book_id, arrSubs ) => {
+	let response = []
+	for ( let sub of arrSubs ) {
+		let read = await Historial.action( { user_id: sub.id, book_id: book_id, book_club_id: book_club_id, action: 'read', comment: '' } )
+		response.push( read )
+	}
+	return response
+}
+
 module.exports = {
 	getOne,
 	getHistorial,
@@ -47,5 +58,6 @@ module.exports = {
 	getOneByEmail,
 	getOneByUsername,
 	subscribe,
-	unsubscribe
+	unsubscribe,
+	readAll
 };

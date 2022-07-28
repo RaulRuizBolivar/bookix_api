@@ -1,6 +1,7 @@
 const { executeQuery, executeQueryOne } = require( "../helpers/utils" );
 const Book = require( './book.model' )
 const Historial = require( './historial.model' )
+const User = require( './user.model' )
 
 
 const getAll = () => {
@@ -65,24 +66,33 @@ const startRead = async () => {
 	for ( const bookClub of allBookClub ) {
 		await setPhase( 'read', bookClub.id )
 		if ( bookClub.missing_pages < 0 ) {
-			const books = await Historial.getWinner( bookClub.id )
-			let winner = {
-				book: books[ 0 ],
-				weight: 0
-			}
-			for ( let vote of books ) {
-				if ( vote.vote_weight > winner.weight ) {
-					winner.book = vote.book
-					winner.weight = vote.vote_weight
+			const books = await Historial.getVotes( bookClub.id )
+			if ( books.length !== 0 ) {
+				let winner = {
+					book: books[ 0 ],
+					weight: 0
 				}
+				for ( let vote of books ) {
+					if ( vote.vote_weight > winner.weight ) {
+						winner.book = vote.book
+						winner.weight = vote.vote_weight
+					}
+				}
+				await setNewBook( winner.book.id, bookClub.id )
+				await setMissingPages( winner.book.num_pages, bookClub.id )
+			} else {
+				let books = await Book.getAllByGenre( bookClub.genre_id )
+				let random = Math.floor( Math.random() * books.length )
+				let winner = books[ random ]
+				await setNewBook( winner.id, bookClub.id )
+				await setMissingPages( winner.num_pages, bookClub.id )
 			}
-			setNewBook( winner.book.id, bookClub.id )
-			setMissingPages( winner.book.num_pages, bookClub.id )
+		} else {
+			const newMissingPages = bookClub.missing_pages - bookClub.num_pages
+			await setMissingPages( newMissingPages, bookClub.id )
 		}
-		const newMissingPages = bookClub.missing_pages - bookClub.num_pages
-		await setMissingPages( newMissingPages, bookClub.id )
 	}
-	console.log( 'Todos los clubs de lectura ahora están leyendo' )
+	console.log( '########### Todos los clubs de lectura ahora están leyendo ###########' )
 }
 
 const readoOrComment = async () => {
@@ -104,6 +114,8 @@ const commentOrVote = async () => {
 		console.log( bookClub.missing_pages )
 		if ( bookClub.missing_pages < 0 ) {
 			console.log( bookClub.name + ': Ahora está votando' )
+			const subs = await getAllSubs( bookClub.id )
+			User.readAll( bookClub.id, bookClub.book_id, subs )
 			return await setPhase( 'vote', bookClub.id )
 		}
 		console.log( bookClub.name + ': Ahora está comentando' )
