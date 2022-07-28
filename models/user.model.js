@@ -44,6 +44,7 @@ const readAll = async ( book_club_id, book_id, arrSubs ) => {
 	for ( let sub of arrSubs ) {
 		let read = await Historial.action( { user_id: sub.id, book_id: book_id, book_club_id: book_club_id, action: 'read', comment: '' } )
 		response.push( read )
+		console.log( '###########' + sub.name + ' ha leido ' + book_id + '###########' )
 	}
 	return response
 }
