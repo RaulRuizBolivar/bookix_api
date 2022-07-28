@@ -18,6 +18,18 @@ router.get( '/', async ( req, res ) => {
 	}
 } )
 
+
+router.get( '/genre', async ( req, res ) => {
+	try {
+		let arrByGenre = await Genre.getAll()
+		for ( let genre of arrByGenre ) {
+			genre.books = await Book.getAllByGenre( genre.id )
+		}
+		res.json( arrByGenre )
+	} catch ( err ) {
+		res.json( { error: err.message } )
+	}
+} )
 router.get( '/:book_id', async ( req, res ) => {
 	try {
 		let book = await Book.getOne( req.params.book_id )
@@ -26,17 +38,6 @@ router.get( '/:book_id', async ( req, res ) => {
 		book.times_read = readed.times
 		book.times_vote = voted.times
 		res.json( book )
-	} catch ( err ) {
-		res.json( { error: err.message } )
-	}
-} )
-router.get( '/genre', async ( req, res ) => {
-	try {
-		let arrByGenre = await Genre.getAll()
-		for ( let genre of arrByGenre ) {
-			genre.books = await Book.getAllByGenre( genre.id )
-		}
-		res.json( arrByGenre )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
