@@ -1,6 +1,7 @@
 const { executeQuery, executeQueryOne } = require( "../helpers/utils" );
 const Book = require( './book.model' )
 const Historial = require( './historial.model' )
+const User = require( './user.model' )
 
 
 const getAll = () => {
@@ -14,7 +15,7 @@ const getAllByAdmin = user_id => {
 
 }
 const getHistorial = bookClub_id => {
-	return executeQuery( 'select  (select username from users where id = h.user_id) as username, (select name from users where id = h.user_id) as name, (select image from users where id = h.user_id) as image, (select front_page from books where id = h.book_id) as front_page, (select title from books where id = h.book_id) as title,(select author from books where id = h.book_id) as author,(select num_pages from books where id = h.book_id) as num_pages,(select synopsis from books where id = h.book_id) as synopsis, action, date, comment from historial h  where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
+	return executeQuery( 'select  (select username from users where id = h.user_id) as username, (select name from users where id = h.user_id) as name, (select image from users where id = h.user_id) as image, (select front_page from books where id = h.book_id) as front_page, (select title from books where id = h.book_id) as title,(select author from books where id = h.book_id) as author,(select num_pages from books where id = h.book_id) as num_pages,(select synopsis from books where id = h.book_id) as synopsis, action, date, comment,book_id from historial h  where h.book_club_id = ? order by h.date desc;', [ bookClub_id ] )
 }
 const getAllByGenre = genre_id => {
 	return executeQuery( 'select bc.* from book_club as bc where genre_id = ?;', [ genre_id ] )
@@ -44,9 +45,11 @@ const setNewBook = ( newBook_id, book_club_id ) => {
 }
 
 
-const create = ( { num_pages, name, image, phase, genre_id, user_id } ) => {
+const create = async ( user_id, { num_pages, name, image, genre_id, book_id } ) => {
 	if ( !image ) image = 'https://www.pamplona.es/sites/default/files/inline-images/libros_biblioteca-web_2.jpg'
-	return executeQuery( 'insert into book_club (num_pages, name, image, phase, genre_id, user_id) values (?,?,?,?,?,?)', [ num_pages, name, image, phase, genre_id, user_id ] )
+	const missing_pages = await Book.getOne( book_id )
+	console.log( missing_pages.num_pages )
+	return executeQuery( "insert into book_club (phase,num_pages, name, image, genre_id, user_id,book_id,missing_pages) values ('read',?,?,?,?,?,?,?)", [ num_pages, name, image, genre_id, user_id, book_id, missing_pages.num_pages ] )
 }
 
 const update = ( id, { num_pages, name, image, phase, genre_id, user_id } ) => {
@@ -63,24 +66,33 @@ const startRead = async () => {
 	for ( const bookClub of allBookClub ) {
 		await setPhase( 'read', bookClub.id )
 		if ( bookClub.missing_pages < 0 ) {
-			const books = await Historial.getWinner( bookClub.id )
-			let winner = {
-				book: books[ 0 ],
-				weight: 0
-			}
-			for ( let vote of books ) {
-				if ( vote.vote_weight > winner.weight ) {
-					winner.book = vote.book
-					winner.weight = vote.vote_weight
+			const books = await Historial.getVotes( bookClub.id )
+			if ( books.length !== 0 ) {
+				let winner = {
+					book: books[ 0 ],
+					weight: 0
 				}
+				for ( let vote of books ) {
+					if ( vote.vote_weight > winner.weight ) {
+						winner.book = vote.book
+						winner.weight = vote.vote_weight
+					}
+				}
+				await setNewBook( winner.book.id, bookClub.id )
+				await setMissingPages( winner.book.num_pages, bookClub.id )
+			} else {
+				let books = await Book.getAllByGenre( bookClub.genre_id )
+				let random = Math.floor( Math.random() * books.length )
+				let winner = books[ random ]
+				await setNewBook( winner.id, bookClub.id )
+				await setMissingPages( winner.num_pages, bookClub.id )
 			}
-			setNewBook( winner.book.id, bookClub.id )
-			setMissingPages( winner.book.num_pages, bookClub.id )
+		} else {
+			const newMissingPages = bookClub.missing_pages - bookClub.num_pages
+			await setMissingPages( newMissingPages, bookClub.id )
 		}
-		const newMissingPages = bookClub.missing_pages - bookClub.num_pages
-		await setMissingPages( newMissingPages, bookClub.id )
 	}
-	console.log( 'Todos los clubs de lectura ahora están leyendo' )
+	console.log( '########### Todos los clubs de lectura ahora están leyendo ###########' )
 }
 
 const readoOrComment = async () => {
@@ -102,6 +114,8 @@ const commentOrVote = async () => {
 		console.log( bookClub.missing_pages )
 		if ( bookClub.missing_pages < 0 ) {
 			console.log( bookClub.name + ': Ahora está votando' )
+			const subs = await getAllSubs( bookClub.id )
+			User.readAll( bookClub.id, bookClub.book_id, subs )
 			return await setPhase( 'vote', bookClub.id )
 		}
 		console.log( bookClub.name + ': Ahora está comentando' )
