@@ -4,7 +4,6 @@ const BookClub = require( '../../models/book_club.model' )
 const Historial = require( '../../models/historial.model' )
 const Subscription = require( '../../models/subscription.model' )
 const bcrypt = require( "bcryptjs" );
-const { body, validationResult } = require( "express-validator" );
 const { createToken } = require( "../../helpers/utils" );
 const { checkToken } = require( '../../helpers/middlewares' )
 
@@ -60,7 +59,7 @@ router.get( '/:user_id', async ( req, res ) => {
 } )
 
 router.post( '/subscribe/:book_club_id', checkToken, async ( req, res ) => {
-	console.log( req.user.id, req.params.book_club_id )
+	console.log( 'intento de suscripcion' )
 	try {
 		await User.subscribe( req.user.id, req.params.book_club_id )
 		res.json( {
@@ -119,12 +118,13 @@ router.post( '/login', async ( req, res ) => {
 } )
 
 
-router.put( '/:user_id', async ( req, res ) => {
+router.put( '/', checkToken, async ( req, res ) => {
+	console.log( req.user )
 	try {
 		req.body.password = bcrypt.hashSync( req.body.password, 12 );
-		let updated = await User.update( req.params.user_id, req.body )
+		let updated = await User.update( req.user.id, req.body )
 		console.log( updated )
-		res.json( await User.getOne( req.params.user_id ) )
+		res.json( await User.getOne( req.user.id ) )
 	} catch ( err ) {
 		res.json( { error: err.message } )
 	}
@@ -132,7 +132,6 @@ router.put( '/:user_id', async ( req, res ) => {
 
 
 router.delete( '/subscribe/:book_club_id', checkToken, async ( req, res ) => {
-	console.log( req.user.id, req.params.book_club_id )
 	try {
 		await User.unsubscribe( req.user.id, req.params.book_club_id )
 		res.json( {
