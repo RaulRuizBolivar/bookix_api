@@ -44,9 +44,11 @@ const setNewBook = ( newBook_id, book_club_id ) => {
 }
 
 
-const create = ( { num_pages, name, image, phase, genre_id, user_id } ) => {
+const create = async ( user_id, { num_pages, name, image, genre_id, book_id } ) => {
 	if ( !image ) image = 'https://www.pamplona.es/sites/default/files/inline-images/libros_biblioteca-web_2.jpg'
-	return executeQuery( 'insert into book_club (num_pages, name, image, phase, genre_id, user_id) values (?,?,?,?,?,?)', [ num_pages, name, image, phase, genre_id, user_id ] )
+	const missing_pages = await Book.getOne( book_id )
+	console.log( missing_pages.num_pages )
+	return executeQuery( "insert into book_club (phase,num_pages, name, image, genre_id, user_id,book_id,missing_pages) values ('read',?,?,?,?,?,?,?)", [ num_pages, name, image, genre_id, user_id, book_id, missing_pages.num_pages ] )
 }
 
 const update = ( id, { num_pages, name, image, phase, genre_id, user_id } ) => {
